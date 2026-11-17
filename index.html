@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>课表查询 · 重庆对外经贸学院</title>
+<meta name="description" content="2026-2027学年第一学期 软件工程1-4班 / 虚拟现实技术1班 课表查询">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="theme-color" content="#FF6FB5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="课表查询">
+<style>
+:root{
+  --paper:#FFF6E9; --card:#FFFFFF; --ink:#221C16; --ink-soft:#6B6257;
+  --line:#221C16; --shadow:#221C16;
+  --pink:#FF6FB5; --blue:#4D9DE0; --yellow:#FFC93C; --green:#5FD35F;
+  --purple:#A66DD4; --orange:#FF8A3D; --teal:#4ECDC4;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(rgba(34,28,22,.055) 1px, transparent 1px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  line-height:1.6; padding-bottom:60px;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+
+/* 顶部彩带 */
+.rainbow{height:10px;display:flex}
+.rainbow i{flex:1}
+
+/* Hero */
+.hero{padding:34px 0 8px;text-align:center;position:relative}
+.kicker{
+  display:inline-block;background:var(--yellow);border:2.5px solid var(--line);
+  border-radius:999px;padding:5px 16px;font-size:13px;font-weight:700;
+  box-shadow:3px 3px 0 var(--shadow);transform:rotate(-1.2deg);margin-bottom:16px;
+}
+h1{margin:0;font-size:34px;line-height:1.25;letter-spacing:-.5px;font-weight:800}
+h1 em{font-style:normal;position:relative;z-index:1}
+h1 em::after{
+  content:"";position:absolute;left:-4px;right:-4px;bottom:4px;height:14px;
+  background:var(--teal);z-index:-1;border-radius:4px;transform:rotate(-.6deg);
+}
+.sub{margin:12px auto 0;color:var(--ink-soft);font-size:14px;max-width:520px}
+.dots{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dots span{position:absolute;border:2.5px solid var(--line);border-radius:50%;opacity:.85}
+.d1{width:26px;height:26px;background:var(--pink);left:4%;top:16%}
+.d2{width:16px;height:16px;background:var(--green);right:6%;top:24%}
+.d3{width:20px;height:20px;background:var(--purple);left:9%;bottom:12%}
+.d4{width:14px;height:14px;background:var(--orange);right:10%;bottom:18%}
+
+/* 步骤卡 */
+.panel{
+  background:var(--card);border:2.5px solid var(--line);border-radius:var(--r);
+  box-shadow:5px 5px 0 var(--shadow);padding:18px;margin-top:20px;
+}
+.phead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.num{
+  width:28px;height:28px;flex:0 0 28px;border-radius:50%;border:2.5px solid var(--line);
+  display:grid;place-items:center;font-size:14px;font-weight:800;background:var(--yellow);
+}
+.phead h2{margin:0;font-size:16px;font-weight:800;letter-spacing:.2px}
+.phead .hint{margin-left:auto;font-size:12px;color:var(--ink-soft)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  border:2.5px solid var(--line);border-radius:14px;background:#fff;
+  padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink);
+  box-shadow:3px 3px 0 var(--shadow);transition:transform .12s ease, box-shadow .12s ease, background .12s;
+  font-family:inherit;
+}
+.chip:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
+.chip:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--shadow)}
+.chip.on{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
+.chip.g{background:var(--green)} .chip.b{background:var(--blue)} .chip.p{background:var(--purple)}
+.chip.o{background:var(--orange)} .chip.t{background:var(--teal)} .chip.y{background:var(--yellow)}
+.chip.k{background:var(--pink)}
+.chip.sm{padding:7px 0;width:46px;text-align:center;border-radius:12px;font-size:14px}
+.chip.day{width:calc((100% - 60px)/7);min-width:60px;padding:9px 0;text-align:center;border-radius:12px}
+.chip.day small{display:block;font-size:11px;font-weight:500;opacity:.75}
+.chip.sm small{display:block;font-size:9px;font-weight:500;opacity:.7;line-height:1}
+.chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pink);margin-left:4px;vertical-align:middle}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.chips.scroll::-webkit-scrollbar{height:6px}
+.chips.scroll::-webkit-scrollbar-thumb{background:var(--ink);border-radius:99px}
+
+/* 视图切换 + 今天 */
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:22px}
+.seg{display:flex;border:2.5px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:4px 4px 0 var(--shadow);background:#fff}
+.seg button{border:0;background:#fff;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink)}
+.seg button.on{background:var(--purple)}
+.seg button+button{border-left:2.5px solid var(--line)}
+.btn{
+  border:2.5px solid var(--line);border-radius:14px;background:var(--yellow);
+  padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink);
+  box-shadow:4px 4px 0 var(--shadow);font-family:inherit;
+}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+.btn.alt{background:#fff}
+.spacer{flex:1}
+
+/* 结果 */
+.title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 14px}
+.title h3{margin:0;font-size:22px;font-weight:800}
+.title span{font-size:13px;color:var(--ink-soft)}
+.pill{background:#fff;border:2.5px solid var(--line);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700;box-shadow:2px 2px 0 var(--shadow)}
+
+.list{display:flex;flex-direction:column;gap:14px}
+.row{
+  display:flex;background:var(--card);border:2.5px solid var(--line);border-radius:var(--r);
+  box-shadow:5px 5px 0 var(--shadow);overflow:hidden;
+  animation:pop .34s cubic-bezier(.2,.9,.3,1.2) backwards;
+}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.slot{
+  flex:0 0 88px;border-right:2.5px dashed rgba(34,28,22,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:12px 6px;text-align:center;
+}
+.slot b{font-size:15px;font-weight:800;line-height:1.2}
+.slot i{font-style:normal;font-size:11px;color:var(--ink-soft);margin-top:3px}
+.slot u{text-decoration:none;font-size:10px;color:var(--ink-soft);margin-top:2px;opacity:.8}
+.body{flex:1;padding:12px 14px;min-width:0;border-left:9px solid var(--teal)}
+.body h4{margin:0 0 6px;font-size:17px;font-weight:800;line-height:1.3;word-break:break-all}
+.meta{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:12.5px;color:var(--ink-soft)}
+.meta b{font-weight:700;color:var(--ink)}
+.tag{border:2px solid var(--line);border-radius:8px;padding:1px 7px;font-size:11px;font-weight:800;background:#fff;color:var(--ink)}
+.tag.c{background:var(--yellow)}
+.tag.e{background:var(--teal)}
+.tag.p{background:var(--pink)}
+.weeks{font-size:11.5px;color:var(--ink-soft);margin-top:6px;word-break:break-all}
+.teach{font-size:12px;color:var(--ink-soft);margin-top:2px;word-break:break-all}
+
+/* 空状态 */
+.empty{
+  background:var(--card);border:2.5px solid var(--line);border-radius:var(--r);
+  box-shadow:5px 5px 0 var(--shadow);padding:44px 20px;text-align:center;
+}
+.empty svg{width:96px;height:96px}
+.empty p{margin:10px 0 0;font-size:16px;font-weight:800}
+.empty small{display:block;color:var(--ink-soft);font-size:13px;margin-top:6px}
+
+/* 整周表 */
+.gridwrap{overflow-x:auto;border:2.5px solid var(--line);border-radius:var(--r);box-shadow:5px 5px 0 var(--shadow);background:#fff}
+table{border-collapse:collapse;width:100%;min-width:660px}
+th,td{border-right:2px solid rgba(34,28,22,.18);border-bottom:2px solid rgba(34,28,22,.18);padding:8px;vertical-align:top}
+th{background:var(--yellow);font-size:13px;font-weight:800;text-align:center;position:sticky;top:0}
+th:first-child,td:first-child{background:#FFFDF6;position:sticky;left:0;z-index:1}
+th:first-child{z-index:2}
+td:first-child{text-align:center;font-size:12px;font-weight:700;min-width:78px}
+td:first-child i{display:block;font-style:normal;font-size:10px;color:var(--ink-soft);font-weight:500}
+.cell{font-size:12px;line-height:1.35}
+.cell b{display:block;font-size:12.5px;font-weight:800;margin-bottom:2px;word-break:break-all}
+.cell span{color:var(--ink-soft);font-size:11px;display:block;word-break:break-all}
+.cell .bar2{display:block;height:5px;border-radius:9px;margin-bottom:5px;border:1.5px solid var(--line)}
+.none{color:#B9B1A5;font-size:12px}
+
+/* 图例 */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.legend span{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+  background:#fff;border:2px solid var(--line);border-radius:999px;padding:3px 10px;box-shadow:2px 2px 0 var(--shadow)}
+.legend i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--line);display:inline-block}
+
+footer{margin-top:26px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.8}
+footer a{color:var(--ink);font-weight:700}
+.setbtn{background:none;border:0;color:var(--ink);font-weight:800;text-decoration:underline;cursor:pointer;font-size:12px;font-family:inherit}
+
+@media(max-width:600px){
+  h1{font-size:26px}
+  .panel{padding:15px}
+  .slot{flex:0 0 70px}
+  .slot b{font-size:13px}
+  .body h4{font-size:15.5px}
+  .chip.day{min-width:52px;width:calc((100% - 36px)/7);font-size:13px;padding:8px 0}
+  .chip{padding:8px 13px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="rainbow">
+  <i style="background:var(--pink)"></i><i style="background:var(--orange)"></i>
+  <i style="background:var(--yellow)"></i><i style="background:var(--green)"></i>
+  <i style="background:var(--teal)"></i><i style="background:var(--blue)"></i>
+  <i style="background:var(--purple)"></i>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span></div>
+    <div class="kicker">重庆对外经贸学院 · 合A校区</div>
+    <h1>2026–2027 学年第一学期<br><em>课表查询</em></h1>
+    <p class="sub" id="subline"></p>
+  </header>
+
+  <section class="panel">
+    <div class="phead"><div class="num" style="background:var(--pink)">1</div><h2>选择班级</h2>
+      <span class="hint">共 5 个班</span></div>
+    <div class="chips" id="cls"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead"><div class="num" style="background:var(--blue)">2</div><h2>选择周次</h2>
+      <span class="hint" id="weekhint"></span></div>
+    <div class="chips scroll" id="wks"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead"><div class="num" style="background:var(--green)">3</div><h2>选择星期</h2>
+      <span class="hint">← → 切换</span></div>
+    <div class="chips" id="days"></div>
+  </section>
+
+  <div class="bar">
+    <div class="seg">
+      <button id="v-day" class="on">当日课表</button>
+      <button id="v-week">整周一览</button>
+    </div>
+    <button class="btn" id="today">回到本周</button>
+    <div class="spacer"></div>
+    <button class="btn alt" id="install" style="display:none">📲 安装App</button>
+    <button class="btn alt" id="share">复制分享链接</button>
+  </div>
+
+  <div class="title">
+    <h3 id="r-title"></h3>
+    <span id="r-sub"></span>
+  </div>
+  <div id="result"></div>
+
+  <div class="legend" id="legend"></div>
+
+  <footer>
+    数据来源：教务系统周课表（按「上课周次」逐周拆分）· 原表未排星期六课程<br>
+    <button class="setbtn" id="setstart">设置第 1 周周一日期</button>
+    <span id="startinfo"></span>
+    <br><span>📲 想当 App 用？手机浏览器打开本页后「添加到主屏幕」即可（安卓 Chrome/Edge、苹果 Safari 均支持，免应用商店、0 元）</span>
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  var T = window.TIMETABLE;
+  var CAT = {
+    ideology:{n:'思政类',c:'#FF6FB5'},
+    math:{n:'数学类',c:'#4D9DE0'},
+    language:{n:'外语类',c:'#FFC93C'},
+    pe:{n:'体育类',c:'#5FD35F'},
+    major:{n:'专业/计算机类',c:'#A66DD4'},
+    general:{n:'通识/学工类',c:'#FF8A3D'},
+    other:{n:'其他',c:'#4ECDC4'}
+  };
+  var DEFAULT_START = '2026-08-31';
+  var CLS_COLOR = ['p','b','o','t','k'];
+  var DAY_SHORT = ['一','二','三','四','五','六','日'];
+  var $ = function(id){return document.getElementById(id)};
+
+  function getStart(){
+    var s = localStorage.getItem('kb_start');
+    if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) s = DEFAULT_START;
+    return new Date(s + 'T00:00:00');
+  }
+  function midnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function currentWeek(){
+    var diff = Math.floor((midnight(new Date()) - getStart()) / 864e5);
+    var w = Math.floor(diff / 7) + 1;
+    return (w >= 1 && w <= T.weeks.length) ? w : 1;
+  }
+  function todayIdx(){ var d = new Date().getDay(); return (d + 6) % 7; }
+
+  var state = { c:0, w:1, d:0, view:'day' };
+
+  function readHash(){
+    var h = location.hash.replace('#','');
+    if(!h) return false;
+    var o = {}; h.split('&').forEach(function(kv){ var p = kv.split('='); o[p[0]] = p[1]; });
+    if(o.c !== undefined && T.classes[+o.c]) state.c = +o.c;
+    if(o.w !== undefined && T.weeks.indexOf(+o.w) >= 0) state.w = +o.w;
+    if(o.d !== undefined && +o.d >= 0 && +o.d < 7) state.d = +o.d;
+    if(o.v === 'week') state.view = 'week';
+    return true;
+  }
+  function readStore(){
+    try{
+      var s = JSON.parse(localStorage.getItem('kb_state') || 'null');
+      if(s && T.classes[s.c] && T.weeks.indexOf(s.w) >= 0){
+        state.c = s.c; state.w = s.w; state.d = s.d; state.view = s.view || 'day';
+      }
+    }catch(e){}
+  }
+  if(!readHash()){ readStore(); state.w = currentWeek(); state.d = todayIdx(); }
+
+  function save(){
+    try{ localStorage.setItem('kb_state', JSON.stringify(state)); }catch(e){}
+    var h = '#c=' + state.c + '&w=' + state.w + '&d=' + state.d + (state.view==='week' ? '&v=week' : '');
+    if(location.hash !== h) history.replaceState(null, '', h);
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]; }); }
+
+  function cell(w, c, d, s){
+    var wk = T.data[String(w)]; if(!wk) return null;
+    var cl = wk[String(c)]; if(!cl) return null;
+    var dy = cl[String(d)]; if(!dy) return null;
+    var i = dy[String(s)];
+    return (i === undefined || i === null) ? null : T.courses[i];
+  }
+
+  /* ---------- 渲染选择器 ---------- */
+  function buildStatic(){
+    $('subline').textContent = T.classes.join(' / ') + ' · 共 ' + T.weeks.length + ' 周 · 每天 6 个节次段';
+
+    $('cls').innerHTML = T.classes.map(function(n, i){
+      return '<button class="chip ' + CLS_COLOR[i % CLS_COLOR.length] + '" data-c="' + i + '">' + esc(n) + '</button>';
+    }).join('');
+
+    $('wks').innerHTML = T.weeks.map(function(w){
+      return '<button class="chip sm" data-w="' + w + '">' + w + '<small>周</small></button>';
+    }).join('');
+
+    $('days').innerHTML = T.days.map(function(n, i){
+      return '<button class="chip day" data-d="' + i + '">' + DAY_SHORT[i] + '<small>' + esc(n.replace('星期','周')) + '</small></button>';
+    }).join('');
+
+    $('legend').innerHTML = Object.keys(CAT).map(function(k){
+      return '<span><i style="background:' + CAT[k].c + '"></i>' + CAT[k].n + '</span>';
+    }).join('');
+
+    $('cls').addEventListener('click', function(e){ var b = e.target.closest('[data-c]'); if(b){ state.c = +b.dataset.c; render(); } });
+    $('wks').addEventListener('click', function(e){ var b = e.target.closest('[data-w]'); if(b){ state.w = +b.dataset.w; render(); } });
+    $('days').addEventListener('click', function(e){ var b = e.target.closest('[data-d]'); if(b){ state.d = +b.dataset.d; render(); } });
+  }
+
+  function markChips(){
+    [].forEach.call($('cls').children, function(b){ b.classList.toggle('on', +b.dataset.c === state.c); });
+    [].forEach.call($('wks').children, function(b){ b.classList.toggle('on', +b.dataset.w === state.w); });
+    [].forEach.call($('days').children, function(b){ b.classList.toggle('on', +b.dataset.d === state.d); });
+    var cw = currentWeek();
+    $('weekhint').textContent = '当前第 ' + cw + ' 周';
+    [].forEach.call($('wks').children, function(b){
+      var has = b.querySelector('.dot');
+      if(+b.dataset.w === cw && !has){
+        var s = document.createElement('span'); s.className = 'dot'; b.appendChild(s);
+      } else if(+b.dataset.w !== cw && has){ has.remove(); }
+    });
+    $('startinfo').textContent = '（第 1 周周一起算日：' + getStart().toISOString().slice(0,10) + '）';
+  }
+
+  function courseCard(c, i, slot){
+    if(!c) return '';
+    var col = (CAT[c.c] || CAT.other).c;
+    var tags = '';
+    if(c.r) tags += '<span class="tag">' + esc(c.r) + '修</span>';
+    if(c.e) tags += '<span class="tag e">' + esc(c.e) + '</span>';
+    if(c.o) tags += '<span class="tag c">' + esc(c.o) + '</span>';
+    if(c.p && !/^0人$/.test(c.p)) tags += '<span class="tag p">选课 ' + esc(c.p) + '</span>';
+    var meta = '';
+    if(c.l) meta += '<b>' + esc(c.l.replace('合A校区','合A·')) + '</b>';
+    if(c.t) meta += '<span>· ' + esc(c.t) + '</span>';
+    return '<div class="row" style="animation-delay:' + (i * 45) + 'ms">' +
+      '<div class="slot"><b>' + esc(slot.label) + '</b>' +
+        (slot.time ? '<i>' + esc(slot.time) + '</i>' : '') +
+        '<u>' + esc(slot.part) + '</u></div>' +
+      '<div class="body" style="border-left-color:' + col + '">' +
+        '<h4>' + esc(c.n) + '</h4>' +
+        (meta ? '<div class="meta">' + meta + tags + '</div>' : (tags ? '<div class="meta">' + tags + '</div>' : '')) +
+        (c.w ? '<div class="weeks">行课周次：' + esc(c.w) + '</div>' : '') +
+      '</div></div>';
+  }
+
+  function renderDay(){
+    var rows = [], n = 0;
+    T.slots.forEach(function(slot, si){
+      var c = cell(state.w, state.c, state.d, si);
+      if(c){ rows.push(courseCard(c, n, slot)); n++; }
+    });
+    if(!n){
+      $('result').innerHTML =
+        '<div class="empty">' +
+        '<svg viewBox="0 0 100 100" aria-hidden="true">' +
+        '<circle cx="50" cy="50" r="20" fill="#FFC93C" stroke="#221C16" stroke-width="3"/>' +
+        '<g stroke="#221C16" stroke-width="3" stroke-linecap="round">' +
+        '<path d="M50 20v-9M50 89v-9M20 50h-9M89 50h-9M29 29l-6-6M77 77l-6-6M71 29l6-6M23 77l6-6"/></g>' +
+        '<circle cx="43" cy="48" r="2.4" fill="#221C16"/><circle cx="57" cy="48" r="2.4" fill="#221C16"/>' +
+        '<path d="M42 56q8 6 16 0" fill="none" stroke="#221C16" stroke-width="3" stroke-linecap="round"/></svg>' +
+        '<p>这一天没有排课</p><small>换个星期或周次看看吧 · 出去晒晒太阳也挺好的</small></div>';
+    } else {
+      $('result').innerHTML = '<div class="list">' + rows.join('') + '</div>';
+    }
+  }
+
+  function renderWeek(){
+    var h = '<div class="gridwrap"><table><thead><tr><th>节次</th>' +
+      T.days.map(function(d, i){
+        return '<th' + (i === todayIdx() && state.w === currentWeek() ? ' style="background:var(--pink)"' : '') + '>' + esc(d.replace('星期','周')) + '</th>';
+      }).join('') + '</tr></thead><tbody>';
+    T.slots.forEach(function(slot, si){
+      h += '<tr><td>' + esc(slot.label) + '<i>' + esc(slot.time) + '</i></td>';
+      T.days.forEach(function(d, di){
+        var c = cell(state.w, state.c, di, si);
+        if(c){
+          var col = (CAT[c.c] || CAT.other).c;
+          h += '<td><div class="cell"><span class="bar2" style="background:' + col + '"></span>' +
+               '<b>' + esc(c.n) + '</b>' +
+               (c.l ? '<span>' + esc(c.l.replace('合A校区','合A·')) + '</span>' : '') +
+               (c.t ? '<span>' + esc(c.t) + '</span>' : '') + '</div></td>';
+        } else {
+          h += '<td><span class="none">—</span></td>';
+        }
+      });
+      h += '</tr>';
+    });
+    $('result').innerHTML = h + '</tbody></table></div>';
+  }
+
+  function render(){
+    markChips();
+    $('v-day').classList.toggle('on', state.view === 'day');
+    $('v-week').classList.toggle('on', state.view === 'week');
+    $('r-title').textContent = T.classes[state.c] + ' · 第 ' + state.w + ' 周';
+    $('r-sub').innerHTML = '<span class="pill">' + esc(T.days[state.d]) + '</span> ' +
+      '<span class="pill">' + (state.view === 'day' ? '当日课表' : '整周一览') + '</span>';
+    if(state.view === 'day') renderDay(); else renderWeek();
+    save();
+  }
+
+  $('v-day').onclick = function(){ state.view = 'day'; render(); };
+  $('v-week').onclick = function(){ state.view = 'week'; render(); };
+  $('today').onclick = function(){ state.w = currentWeek(); state.d = todayIdx(); render(); };
+  $('share').onclick = function(){
+    var url = location.href.split('#')[0] + '#c=' + state.c + '&w=' + state.w + '&d=' + state.d + (state.view === 'week' ? '&v=week' : '');
+    var done = function(){ var b = $('share'); var t = b.textContent; b.textContent = '已复制 ✓'; setTimeout(function(){ b.textContent = t; }, 1600); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done, function(){ prompt('复制这个链接分享：', url); });
+    } else { prompt('复制这个链接分享：', url); }
+  };
+  $('setstart').onclick = function(){
+    var v = prompt('设置「第 1 周周一」的日期（格式 YYYY-MM-DD）：', getStart().toISOString().slice(0,10));
+    if(v && /^\d{4}-\d{2}-\d{2}$/.test(v)){ localStorage.setItem('kb_start', v); render(); }
+    else if(v) alert('格式不对，请用 2026-08-31 这种写法');
+  };
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT') return;
+    if(e.key === 'ArrowLeft'){ state.d = (state.d + 6) % 7; render(); }
+    if(e.key === 'ArrowRight'){ state.d = (state.d + 1) % 7; render(); }
+    if(e.key === 'ArrowUp'){ state.w = Math.min(T.weeks.length, state.w + 1); render(); }
+    if(e.key === 'ArrowDown'){ state.w = Math.max(1, state.w - 1); render(); }
+  });
+
+  buildStatic();
+  render();
+})();
+</script>
+<script>
+(function(){
+  // PWA：注册 Service Worker，支持离线 / 安装到主屏幕
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(e){ console.warn('SW 注册失败', e); });
+    });
+  }
+  // 捕获浏览器“可安装”事件，显示安装按钮
+  var deferredPrompt = null;
+  var iBtn = document.getElementById('install');
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    if (iBtn) iBtn.style.display = '';
+  });
+  if (iBtn) {
+    iBtn.addEventListener('click', function(){
+      if (!deferredPrompt) {
+        alert('请直接在手机浏览器中操作：\n· 安卓（Chrome/Edge）：点右上角「⋮」→「安装应用」或「添加到主屏幕」\n· 苹果（Safari）：点底部「分享」→「添加到主屏幕」');
+        return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(){ deferredPrompt = null; iBtn.style.display = 'none'; });
+    });
+  }
+  window.addEventListener('appinstalled', function(){ if (iBtn) iBtn.style.display = 'none'; });
+})();
+</script>
+</body>
+</html>
